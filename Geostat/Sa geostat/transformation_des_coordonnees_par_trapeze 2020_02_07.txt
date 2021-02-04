@@ -1,0 +1,154 @@
+proj.conformal <- function(x,y,ref.line,col=2,lwd=2,cex=1,orthogonal=F,closed=F)
+{
+### Orthogonal = T ==> proj perpendiculaire à chaque segment
+### Orthogonal = F ==> proj selon un axe intermédiaire entre les coté des trapèzes
+### coordonnées des sommets des segments et dimension des segments
+### closed = T ==> la ligne de référence, parcourue CLOCKWISE, est fournie fermée
+yref=ref.line$y
+xref=ref.line$x
+nref=length(xref) # nbr de points dans la ligne de référence
+sref= nref - 1 # nbr de segments dans la ligne de reference
+dy=yref[-1]-yref[-nref]
+dx=xref[-1]-xref[-nref]
+
+uref <- array(NA,dim=c(sref,2))
+vref <- array(NA,dim=c(sref,2))
+vtrap <- array(NA,dim=c(nref-closed,2))
+
+### calcul des nouvelles coordonnées
+### ATTENTION ces coordonnées doivent être ré-orientée si nécessaire 
+### e.g. d.along ==> - d.along et/ou d.across ==> - d.across
+d = sqrt(dx^2+dy^2) ### longueur des segments
+dd = c(0,cumsum(d)) ### longeur cumulée
+
+### cardinal des points 
+n=length(x)
+
+### vecteur directeur des segments, normés à 1
+for(i in 1:(nref-1))
+	assign(paste("u",i,sep=""),c(dx[i]/sqrt(dx[i]^2+dy[i]^2),dy[i]/sqrt(dx[i]^2+dy[i]^2)))
+
+uref <- cbind(dx/sqrt(dx^2+dy^2),dy/sqrt(dx^2+dy^2))
+vref <- cbind(-uref[,2],uref[,1])
+
+### vecteurs directeurs des cotés des trapèzes
+if(!closed){
+v1 <- c(-u1[2],u1[1]) #### attention à l'orientation de V1
+for(i in 2:(nref-1)){
+	ui <- get(paste("u",i,sep=""))
+	uimoins1 <- get(paste("u",i-1,sep=""))
+	assign(paste("v",i,sep=""),c(-uimoins1[2]-ui[2],uimoins1[1]+ui[1]))
+}
+unrefmoins1 <- get(paste("u",nref-1,sep=""))
+assign(paste("v",nref,sep=""),c(-unrefmoins1[2],unrefmoins1[1]))
+}
+
+if(closed){
+	vtrap <- 0.5*(rbind(vref,vref[1,])+rbind(vref[sref,],vref))
+}
+
+
+### représentation graphique
+if(!closed){
+plot(x,y,cex=cex,asp=1)
+lines(xref,yref,col=col,lwd=lwd)
+for(i in 1:nref){
+	vi <- get(paste("v",i,sep=""))
+	abline(a=yref[i]- vi[2]*xref[i]/vi[1],b=vi[2]/vi[1])
+}
+}
+if(closed){
+plot(x,y,cex=cex,asp=1)
+#lines(xref,yref,col=col,lwd=lwd)
+for(k in 1:(dim(vtrap)[1]-1)){
+	#abline(a=yref[i]- vtrap[i,2]*xref[i]/vtrap[i,1],b=vtrap[i,2]/vtrap[i,1])
+	segments(x0=xref[k],y0=yref[k],x1=xref[k]+vtrap[k,1],y1=yref[k]+vtrap[k,2],lwd=2)
+	arrows(x0=xref[k],y0=yref[k],x1=xref[k+1],y1=yref[k+1],col=col,lwd=lwd)
+}
+}
+
+
+### création d'une fonction qui permet de projeter un point sur une droite
+### point à projeter x=c(x1,x2)
+### sur la droite de vecteur directeur v=c(v1,v2) passant par le point xv=c(xv1,xv2)
+### selon une direction u=c(u1,u2)
+proj.pt.on.line <- function(x,v,xv,u)
+{
+if(u[1]!=0 & v[1]!=0){
+	beta.v = xv[2]-(v[2]/v[1])*xv[1]
+	beta.u = x[2]-(u[2]/u[1])*x[1]
+	resx = (beta.u-beta.v)/((v[2]/v[1])-(u[2]/u[1]))
+	resy = (v[2]/v[1])*resx + beta.v
+	res=c(resx,resy)
+}
+if(u[1]==0){
+	resx <- x[1]
+	a <- v[2]/v[1]
+	b <- xv[2]-a*xv[1]
+	resy <- a*resx+b
+	res <- c(resx,resy) 
+}
+if(v[1]==0){
+	resx=xv[1]
+	a <- u[2]/u[1]
+	b <- x[2]-a*x[1]
+	resy <- a*resx+b
+	res <- c(resx,resy) 
+}
+res
+}
+
+#### Appartenance aux trapèzes
+#### un pt est dans un trapèze si il est entre ses deux projetés sur les bords du trapeze (projection selon l'axe du trapeze) 
+#### - ce qui est testé par le caractère négatif du produit scalaire des deux vecteurs formés  avec ses projetés -
+#### et ce dans le même ordre qu'un point (e.g. le pt central) de l'axe du trapèze
+#### - ce qui est testé par le caractère positif du produit scalaire entre les vecteurs reliant chaque point et leurs premiers projetés.
+trapeze.nb = rep(NA,n)
+ps = rep(NA,n)
+side <- rep(NA,n)
+alpha <- rep(NA,n)
+d.across <- rep(NA,n)
+d.along <- rep(NA,n)
+
+for(i in 1:n){
+	cond <- T
+	j <- 1
+	while(cond && (j <= (nref-1))){
+		vj <- vtrap[j,] #get(paste("v",j,sep=""))
+		vjj <- vtrap[j+1,] #get(paste("v",j+1,sep=""))
+		uj <- uref[j,] #get(paste("u",j,sep=""))
+		inter.j <- proj.pt.on.line(c(x[i],y[i]),vj,c(xref[j],yref[j]),uj)     	
+		inter.jj <- proj.pt.on.line(c(x[i],y[i]),vjj,c(xref[j+1],yref[j+1]),uj)     
+		d.inter.j <- c(inter.j[1]-x[i],inter.j[2]-y[i])
+		d.inter.jj <- c(inter.jj[1]-x[i],inter.jj[2]-y[i])
+		ps.0 <- d.inter.j[1]*d.inter.jj[1] + d.inter.j[2]*d.inter.jj[2]
+		sign.0 <- sign(ps.0)
+		if(sign.0==-1){
+			alpha.0 = sqrt( (x[i]-inter.j[1])^2 + (y[i]-inter.j[2])^2) / sqrt( (inter.jj[1]-inter.j[1])^2 + (inter.jj[2]-inter.j[2])^2)
+			res.0 = c(xref[j] + alpha.0*dx[j],yref[j] + alpha.0*dy[j])
+			# signe du prod. vectoriel entre vect. dir. de l'axe du trapeze et vect. reliant le piont projete et le point courant
+			# si < 0 ==>
+			# si > 0 ==>
+			side.0 <- sign( (y[i]-res.0[2])*uj[1] - (x[i]-res.0[1])*uj[2] )			
+			if(side.0 == 1 | side.0==0) cond <-F 
+			if(side.0 == -1) j<-j+1
+		}
+		if(sign.0==1) j <- j+1
+	}
+	trapeze.nb[i] <- j
+	alpha[i] <- alpha.0
+	side[i] <- side.0 
+	d.across[i] <- sqrt((x[i]-res.0[1])^2+(y[i]-res.0[2])^2)
+	d.along[i] <- dd[j] + alpha[i]*d[j]
+	ps[i]=ps.0
+}
+
+
+
+#d.along = d[trapeze.nb] + alpha*dd[trapeze.nb] 
+#d.across = sign(y-res[,2])*sqrt((x-res[,1])^2+(y-res[,2])^2)
+#d.across = side*sqrt((x-res[,1])^2+(y-res[,2])^2)
+
+res=list(x=d.across,y=d.along,alpha=alpha,side=side,trapeze.nb=trapeze.nb,ps=ps)
+assign("res",res,.GlobalEnv)
+}

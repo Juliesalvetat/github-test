@@ -1,0 +1,9 @@
+Cat_Fish_mask=mask_fish(size_to_use,:);
+Mask_to_add=zeros(size(Cat_Fish_mask,1),nlayer_Toadd);
+Cat_Fish_mask=[Cat_Fish_mask,Mask_to_add];
+Cat_Fish_mask=Cat_Fish_mask';
+echo.mask_fish(1:size(Cat_Fish_mask,1),ESU_SELection(size_to_use),1:2)=repmat(Cat_Fish_mask,[1 1 length(FrequencySort)]);
+echo.Mask_clean_OLD(1:size(Cat_Fish_mask,1),ESU_SELection(size_to_use),1:2)=input_echo.Mask_clean(1:size(Cat_Fish_mask,1),ESU_SELection(size_to_use),:);
+temp=ones(size(echo.mask_fish(:,ESU_SELection(size_to_use),:)));
+temp(~echo.mask_fish(:,ESU_SELection(size_to_use),:))=NaN;
+echo.Mask_clean(:,ESU_SELection(size_to_use),:)=temp;
