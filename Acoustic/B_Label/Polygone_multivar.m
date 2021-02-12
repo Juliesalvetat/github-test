@@ -141,11 +141,11 @@ for FAROFA=1:3;
                 Poly_LabelName{count,1} = newLabelName{i,2};
                 Poly_EsuPingStart = [Poly_EsuPingStart EsuPingStartEnd(1,ind_x)];
 %                 figure; imagesc(BW);xlim([min(d)-100 max(d)+100]);hold on; plot(stat.Centroid(1),stat.Centroid(2),'ro');
-                               centroids = cat(1,stat.Centroid);
-                               plot(centroids(:,1),centroids(:,2),...
-                                   'MarkerEdgeColor','k',...
-                                   'MarkerFaceColor',[.49 1 .63],...
-                                   'MarkerSize',10)
+%                                centroids = cat(1,stat.Centroid);
+%                                plot(centroids(:,1),centroids(:,2),...
+%                                    'MarkerEdgeColor','k',...
+%                                    'MarkerFaceColor',[.49 1 .63],...
+%                                    'MarkerSize',10)
                 %
                 BWf = BWf | BW;
                 %figure; imagesc(BWf)
@@ -154,30 +154,30 @@ for FAROFA=1:3;
                 %                 f=f(~isnan(cip));
                 im = boolean_maskFish & BW;
                 maskFish = Sv_Fish_70.*im;
-                                                 figure;gtsecho(Sv_Fish_70,depth_surface,[-80 -40],Bottom(1,:));
-                
-                                                 figure;gtsecho(maskFish,depth_surface,[-80 -40],Bottom(1,:)+TransducerDepth);
-                                                 hold on
-                                                 plot(d,f,'--b','Linewidth',2)
-                                                 xlim([min(d)-100 max(d)+100])
-                                                 ylim([0 max(max(Bottom(1,min(d)-50:max(d)+50)),max(f))])
-                                                 pl=line([ind_x ind_x],[Bottom(ind_x) depth_surface(ind_y)])
-                                                 pl.Color = 'black';
-                                                 pl.LineStyle = '--';
-                                                 pl.LineWidth = 2;
-                                                 p2=line([0 ind_x],[depth_surface(ind_y) depth_surface(ind_y)])
-                                                 p2.Color = 'black';
-                                                 p2.LineStyle = '--';
-                                                 p2.LineWidth = 2;                                                 
-                                                 plot(ind_x,depth_surface(ind_y),...
-                                                     '-mo',...
-                                                     'LineWidth',2,...
-                                                     'MarkerEdgeColor','k',...
-                                                     'MarkerFaceColor',[.49 1 .63],...
-                                                     'MarkerSize',10)
-
-                                                
-                                                line([0 L],[0 0]);
+%                                                  figure;gtsecho(Sv_Fish_70,depth_surface,[-80 -40],Bottom(1,:));
+%                 
+%                                                  figure;gtsecho(maskFish,depth_surface,[-80 -40],Bottom(1,:)+TransducerDepth);
+%                                                  hold on
+%                                                  plot(d,f,'--b','Linewidth',2)
+%                                                  xlim([min(d)-100 max(d)+100])
+%                                                  ylim([0 max(max(Bottom(1,min(d)-50:max(d)+50)),max(f))])
+%                                                  pl=line([ind_x ind_x],[Bottom(ind_x) depth_surface(ind_y)])
+%                                                  pl.Color = 'black';
+%                                                  pl.LineStyle = '--';
+%                                                  pl.LineWidth = 2;
+%                                                  p2=line([0 ind_x],[depth_surface(ind_y) depth_surface(ind_y)])
+%                                                  p2.Color = 'black';
+%                                                  p2.LineStyle = '--';
+%                                                  p2.LineWidth = 2;                                                 
+%                                                  plot(ind_x,depth_surface(ind_y),...
+%                                                      '-mo',...
+%                                                      'LineWidth',2,...
+%                                                      'MarkerEdgeColor','k',...
+%                                                      'MarkerFaceColor',[.49 1 .63],...
+%                                                      'MarkerSize',10)
+% 
+%                                                 
+%                                                 line([0 L],[0 0]);
                 %                 saveas(gcf,[path_lib, LabelName2{i},'\FAROFA_2_Label_',num2str(i),'n',num2str(count),'.png'])
                 % %                 close all
                 %                 % figure;imagesc(BW);xlim([min(d)-100 max(d)+100])
@@ -212,13 +212,16 @@ for FAROFA=1:3;
             Poly_select_Sa_200(im_bin)=Sa_Fish_200(im_bin);
             
             Poly_Sv_70 = Poly_select_Sv_70(~isnan(Poly_select_Sv_70));
-            Poly_Sa_70 = Poly_select_Sa_70(~isnan(Poly_select_Sa_70));
             Poly_Sv_200 = Poly_select_Sv_200(~isnan(Poly_select_Sv_200));
+            tmp = sum(~isnan(Poly_select_Sa_70),1);
+            nb_ping_non_nul = length(find(tmp>0));
+            
+            Poly_Sa_70 = Poly_select_Sa_70(~isnan(Poly_select_Sa_70));
             Poly_Sa_200 = Poly_select_Sa_200(~isnan(Poly_select_Sa_200));
             
-            Poly_sum_Sa_70 = [Poly_sum_Sa_70 nansum(Poly_Sa_70)];
+            Poly_sum_Sa_70 = [Poly_sum_Sa_70 nansum(Poly_Sa_70)/nb_ping_non_nul];
             Poly_mean_Sv_70 = [Poly_mean_Sv_70 log10(nanmean(10.^(Poly_Sv_70)))];
-            Poly_sum_Sa_200 = [Poly_sum_Sa_200 nansum(Poly_Sa_200)];
+            Poly_sum_Sa_200 = [Poly_sum_Sa_200 nansum(Poly_Sa_200)/nb_ping_non_nul];
             Poly_mean_Sv_200 = [Poly_mean_Sv_200 log10(nanmean(10.^(Poly_Sv_200)))];
             
             
