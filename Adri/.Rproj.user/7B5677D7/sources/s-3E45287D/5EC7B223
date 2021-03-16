@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1615907648985.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5EC7B223",
+    "lastKnownWriteTime" : 1615909625,
+    "last_content_update" : 1615909830798,
+    "path" : "~/GitHub/github-test/Adri/main.r",
+    "project_path" : "main.r",
+    "properties" : {
+        "cursorPosition" : "250,21",
+        "scrollLine" : "216",
+        "source_window_id" : "wdcatnjsyc2wf"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
