@@ -87,9 +87,10 @@ root.dir = getwd()
   hist(db[,"LogSa70"],breaks=100,col="grey",main="",xlab="LogSa70")
   
   # display
+  png("./3_results/data_map_LogSa70_rplot.png") 
   plot(db,col=my.palette,asp=1)
   plot(poly.Fernando,add=T)
-
+  dev.off()
 
 
 ###################################################
@@ -107,8 +108,10 @@ root.dir = getwd()
     db.unfold <- db.add(db.unfold,LogSa70=db$LogSa70)
     db.unfold <- db.add(db.unfold,tmp,loctype=NA)
     
+    png("./3_results/LogSa70_proj_rplot.png") 
     plot(db.unfold,col=my.palette)
     abline(v=0.05)
+    
     # adding lines corresponding to the different trapeze
     yref=ref.line$y
     xref=ref.line$x
@@ -118,7 +121,7 @@ root.dir = getwd()
     d = sqrt(dx^2+dy^2) 
     dd = c(0,cumsum(d)) 
     abline(h=dd)
-
+    dev.off()
   # Drift  ------------------------------------------------------------------
 #   x.breaks <- seq(0,0.1,0.001)
 #   x.mids <- (x.breaks[-1]+x.breaks[-length(x.breaks)])/2
@@ -141,11 +144,12 @@ root.dir = getwd()
 # # 
 # 
 vario <- vario.calc(db.unfold,lag=0.0005,nlag=40)#,dirvect=c(0,90))
-plot(vario,npairdw=T,flag.norm=F,add=T)
+png("./3_results/LogSa70_vario_rplot.png") 
+plot(vario,npairdw=T,flag.norm=F)
 model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
                           auth.aniso = T,
                           col=my.palette[c(1,16)],flag.noreduce = T)
-  
+dev.off()  
   
   
   
@@ -154,15 +158,15 @@ model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
 ###################################################
 
   # Display the histogram
+  png("./3_results/Hist_LogSa70_rplot.png") 
   hist(db.unfold[,"LogSa70"],breaks=100,col="grey",main="",xlab="LogSa70")
-  
+  dev.off()
   # Define the anamorphosis model
   model.anam <- anam.fit(db.unfold,type="emp",draw=TRUE)
   db.unfold <- anam.z2y(db.unfold,anam=model.anam)
   print(db.unfold,flag.stats=TRUE,names="Gaussian.LogSa70")
   db.unfold <- db.rename(db.unfold,name="Gaussian.LogSa70",newname="Yp")
   hist(db.unfold[,"Yp"],breaks=100,col="grey",main="",xlab="Yp")
-  
   
   ycut <- round(qnorm(sum(db.extract(db.unfold,"LogSa70") == 0) / db.unfold$nech),5)
   Y <- db.extract(db.unfold,"Yp")
@@ -174,6 +178,7 @@ model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
 
   # Variogram of untracted variable (Yp)
   vario.Yp = vario.calc(db.unfold,lag=0.0005,nlag=40)#,dirvect=c(0,90))
+  
   plot(vario.Yp,npairdw=T,flag.norm=F)
   model.vario.Yp <- model.auto(vario.Yp,struct=c(1,3,3,8),npairdw=T,wmode=2,
                                auth.aniso = T,
@@ -182,6 +187,7 @@ model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
   # Variogram truncated variable (Y)
   n.H <- 40
   vario.Y <- vario.trans.cut(vario.Yp,ycut,n.H)
+  png("./3_results/LogSa70_varioYpY_rplot.png") 
   plot(vario.Y,npairdw=T,flag.norm=F)
   model.vario.Y <- model.auto(vario.Y,struc=melem.name(c(1,2,3)),draw=F)
   
@@ -191,7 +197,7 @@ model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
   plot(model.vario.Yp,npairdw=T,add=T,col="black")
   legend(x="bottomright",legend=c("Variogram of Yp","Variogram of Y"),
          lty=c(1,1),col=c("black","red"))
-
+  dev.off()
   # define interval limit
   Ymax <- db.extract(db.unfold,name="Yp",flag.compress=FALSE)
   Ymin <- db.extract(db.unfold,name="Yp",flag.compress=FALSE)
@@ -211,14 +217,19 @@ model.vario <- model.auto(vario,struct=c(1,3,3,8),npairdw=T,wmode=2,
   print(db.unfold,flag.stats=TRUE,names="Y")
   
   # Histograms
+  png("./3_results/HistYp_rplot.png") 
   hist(db.unfold[,"Yp"],breaks=100,xlim=c(-4,4),ylim=c(0,300),main="",xlab="Yp")
+  dev.off()
+  png("./3_results/HistY_rplot.png") 
   hist(db.unfold[,"Y"],breaks=100,xlim=c(-4,4),ylim=c(0,300),main="",xlab="Y")
+  dev.off()
   
   # Variogram gibbs variable (unused later ...)
   vario.Yg  <- vario.calc(db.unfold,lag=0.0005,nlag=40)#,dirvect=c(0,90))
+  png("./3_results/vario_Yg_rplot.png") 
   plot(vario.Yg,npairdw=TRUE,inches=0.05)
   plot(model.vario.Y,add=TRUE,col="red")
-
+  dev.off()
   
 ###################################################
 # Projected grid
@@ -261,7 +272,9 @@ grid.simu <- simtub(dbin=db.unfold.extended, dbout=db.pseudogrid.unfold, model=m
                     = 0, seed = 232132,
                     nbsimu = 1, nbtuba = 100,
                     radix = "Simu", modify.target = TRUE)
+png("./3_results/grid_simu_unfold_rplot.png") 
 plot(grid.simu)
+dev.off()
 print(grid.simu,flag.stats=TRUE,names="Simu.Y.S1")
 # Display
 plot(grid.simu,name="Simu.Y.S1",
@@ -291,8 +304,9 @@ tmp <- rep(NA,grid$nech)
 tmp[sel] <- grid.simu$Simu.Y.S1
 #tmp [tmp < 0] <-0
 kri <- db.add(kri, simu.s1 = tmp)
-
-plot(kri)#,name.image="K.estim",col=my.palette,pos.legend=3,zlim=c(0,100),asp=1)
+png("./3_results/Simu_s1_rplot.png") 
+plot(kri,asp=1)#,name.image="K.estim",col=my.palette,pos.legend=3,zlim=c(0,100),asp=1)
 plot(poly.Fernando,add=T)
-plot(db,add=T,col=1,inches=0.05)
+dev.off()
+#plot(db,add=T,col=1,inches=0.05)
 
