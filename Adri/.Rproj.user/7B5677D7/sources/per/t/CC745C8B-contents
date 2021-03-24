@@ -173,7 +173,7 @@ dev.off()
   Y[Y < ycut] <- ycut
   db.unfold <- db.replace(db.unfold,"Yp",Y)
   hist(db.unfold[,"Yp"],breaks=100,col="grey",main="",xlab="Yp")
-  hist(Y,breaks=100,col="grey",main="",xlab="Yp")
+  hist(Y,breaks=100,col="grey",main="",xlab="Y")
   print(db.unfold ,flag.stats=TRUE,names="Yp")
 
   # Variogram of untracted variable (Yp)
